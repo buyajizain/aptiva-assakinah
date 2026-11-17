@@ -22,6 +22,10 @@ class AppServiceProvider extends ServiceProvider
     {
         Vite::prefetch(concurrency: 3);
 
+        if (app()->environment('production') || request()->header('X-Forwarded-Proto') === 'https' || str_contains((string) request()->url(), 'railway.app')) {
+            \Illuminate\Support\Facades\URL::forceScheme('https');
+        }
+
         // Auto-provision SQLite & run migrations on initial cloud deployment (web requests only)
         if (!app()->runningInConsole()) {
             try {
