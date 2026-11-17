@@ -21,5 +21,24 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Vite::prefetch(concurrency: 3);
+
+        // Auto-provision SQLite & run migrations on initial cloud deployment (web requests only)
+        if (!app()->runningInConsole()) {
+            try {
+                if (config('database.default') === 'sqlite') {
+                    $dbPath = config('database.connections.sqlite.database');
+                    if ($dbPath && !file_exists($dbPath)) {
+                        @touch($dbPath);
+                    }
+                }
+
+                if (!\Illuminate\Support\Facades\Schema::hasTable('users')) {
+                    \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+                    \Illuminate\Support\Facades\Artisan::call('db:seed', ['--force' => true]);
+                }
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('Auto-provisioning check: ' . $e->getMessage());
+            }
+        }
     }
 }
