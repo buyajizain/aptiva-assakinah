@@ -7,7 +7,9 @@
         <title inertia>{{ config('app.name', 'Laravel') }}</title>
 
         <!-- PWA Meta Tags -->
-        <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+        @if (app()->environment('production') || str_contains((string) request()->url(), 'railway.app'))
+            <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+        @endif
         <link rel="manifest" href="/manifest.json">
         <meta name="theme-color" content="#1e40af">
         <meta name="mobile-web-app-capable" content="yes">
